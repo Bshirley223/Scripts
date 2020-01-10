@@ -1,23 +1,26 @@
 #!/bin/bash
 
+RED='\033[0;31m'
+I=printf
+
 
 
  #=================================================================================================================================
- echo "#1.Disable SELinux."
+ $I " ${RED}#1.Disable SELinux."
  #=================================================================================================================================
 
         setenforce 0
         sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
 
 #=================================================================================================================================
-echo "# 2. Enable the br_netfilter module for cluster communication."
+ $I " ${RED}# 2. Enable the br_netfilter module for cluster communication."
 #=================================================================================================================================
 
         modprobe br_netfilter
         echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
 
 #=================================================================================================================================
-echo "# 3. Disable swap to prevent memory allocation issues."
+ $I " ${RED}# 3. Disable swap to prevent memory allocation issues."
 #=================================================================================================================================
 
         swapoff -a
@@ -26,21 +29,21 @@ echo "# 3. Disable swap to prevent memory allocation issues."
         echo "#/root/swap swap swap sw 0 0" >> /etc/fstab
 
 #=================================================================================================================================
-echo "# 4. Install the Docker prerequisites."
+ $I " ${RED}# 4. Install the Docker prerequisites."
 #=================================================================================================================================
 
         yum install -y yum-utils device-mapper-persistent-data lvm2 & sleep 60
 
 
 #=================================================================================================================================
-echo "# 5. Add the Docker repo and install Docker."
+ $I " ${RED}#5. Add the Docker repo and install Docker."
 #=================================================================================================================================
 
         yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
         yum install -y docker-ce  
 
 #=================================================================================================================================
-echo "# 6. Conigure the Docker Cgroup Driver to systemd, enable and start Docker"
+ $I " ${RED}# 6. Conigure the Docker Cgroup Driver to systemd, enable and start Docker"
 #=================================================================================================================================
 
         sed -i '/^ExecStart/ s/$/ --exec-opt native.cgroupdriver=systemd/' /usr/lib/systemd/system/docker.service
@@ -49,20 +52,20 @@ echo "# 6. Conigure the Docker Cgroup Driver to systemd, enable and start Docker
         systemctl start docker
 
 #=================================================================================================================================
-echo "# 7. Add the Kubernetes repo."
+ $I " ${RED}# 7. Add the Kubernetes repo."
 #=================================================================================================================================
 
 printf  "[kubernetes]\nname=Kubernetes\nbaseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64\nenabled=1\ngpgcheck=0\ngpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg\nhttps://packages.cloud.google.com/yum/doc/rpm-package-key.gpg" >> /etc/yum.repos.d/kubernetes.repo
 
 
 #=================================================================================================================================
-echo "# 8. Install Kubernetes."
+ $I " ${RED} 8. Install Kubernetes."
 #=================================================================================================================================
 
     yum install -y kubelet kubeadm kubectl 
 
 #=================================================================================================================================
-echo "# 9 .Enable Kubernetes. The kubelet service will not start until you run kubeadm init."
+ $I " ${RED}# 9 .Enable Kubernetes. The kubelet service will not start until you run kubeadm init."
 #=================================================================================================================================
 
     systemctl enable kubelet
@@ -75,13 +78,13 @@ echo "# 9 .Enable Kubernetes. The kubelet service will not start until you run k
                 if [[ $REPLY =~ ^[Yy]$ ]]
                 then
 #=================================================================================================================================
-echo "#10.a Initialize the cluster using the IP range for Flannel."
+ $I " ${RED}#10.a Initialize the cluster using the IP range for Flannel."
 #=================================================================================================================================
 
         kubeadm init --pod-network-cidr=10.244.0.0/16
 
 #=================================================================================================================================
-echo "# 11.a Exit sudo and Copy the kubeadmin join command."
+ $I " ${RED}# 11.a Exit sudo and Copy the kubeadmin join command."
 #=================================================================================================================================
 
 #may need to exit here
@@ -92,7 +95,7 @@ echo "# 11.a Exit sudo and Copy the kubeadmin join command."
         sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 #=================================================================================================================================
-echo "# 12.a Deploy Flannel."
+ $I " ${RED}# 12.a Deploy Flannel."
 #=================================================================================================================================
 
         kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml 
@@ -114,7 +117,7 @@ cat
   then
 
 #=================================================================================================================================
-echo "# 10.b Run the join command that you copied earlier froom the master node after kube finished installing (this command needs to be run as sudo), then check your nodes from the master."
+ $I " ${RED}# 10.b Run the join command that you copied earlier froom the master node after kube finished installing (this command needs to be run as sudo), then check your nodes from the master."
 #=================================================================================================================================
 
 echo " example: kubeadm join 172.31.107.15:6443 --token 0zazre.1v8mwmxe2ueli6y6 \
@@ -123,7 +126,7 @@ echo " example: kubeadm join 172.31.107.15:6443 --token 0zazre.1v8mwmxe2ueli6y6 
         kubectl get nodes
 
 #=================================================================================================================================
-echo "# 11.b Print finished to let user know script is complete"
+ $I " ${RED}# 11.b Print finished to let user know script is complete"
 #=================================================================================================================================
 
         echo "finished"
