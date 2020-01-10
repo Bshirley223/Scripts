@@ -37,7 +37,7 @@ echo "# 5. Add the Docker repo and install Docker."
 #=================================================================================================================================
 
         yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-        yum install -y docker-ce & wait 60 
+        yum install -y docker-ce  
 
 #=================================================================================================================================
 echo "# 6. Conigure the Docker Cgroup Driver to systemd, enable and start Docker"
@@ -59,7 +59,7 @@ printf  "[kubernetes]\nname=Kubernetes\nbaseurl=https://packages.cloud.google.co
 echo "# 8. Install Kubernetes."
 #=================================================================================================================================
 
-    yum install -y kubelet kubeadm kubectl & sleep 180
+    yum install -y kubelet kubeadm kubectl 
 
 #=================================================================================================================================
 echo "# 9 .Enable Kubernetes. The kubelet service will not start until you run kubeadm init."
@@ -95,12 +95,17 @@ echo "# 11.a Exit sudo and Copy the kubeadmin join command."
 echo "# 12.a Deploy Flannel."
 #=================================================================================================================================
 
-        kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+        kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml 
+
+
 
 #Check the cluster state.
 
         kubectl get pods --all-namespaces
 
+
+echo "==== !! COPY THE JOIN COMMAND ABOVE AND SAVE IT !! ===="
+cat 
 
                 fi
 
@@ -109,8 +114,11 @@ echo "# 12.a Deploy Flannel."
   then
 
 #=================================================================================================================================
-echo "# 10.b Run the join command that you copied earlier (this command needs to be run as sudo), then check your nodes from the master."
+echo "# 10.b Run the join command that you copied earlier froom the master node after kube finished installing (this command needs to be run as sudo), then check your nodes from the master."
 #=================================================================================================================================
+
+echo " example: kubeadm join 172.31.107.15:6443 --token 0zazre.1v8mwmxe2ueli6y6 \
+    --discovery-token-ca-cert-hash sha256:20fc6be8f40c35033656bc52dfc7077b5c653baa33cdac6a0702c01ae43a0098"
 
         kubectl get nodes
 
